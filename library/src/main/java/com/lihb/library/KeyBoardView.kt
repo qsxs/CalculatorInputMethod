@@ -115,40 +115,67 @@ open class KeyBoardView : LinearLayout {
 
     private fun onButtonClick(button: Button) {
         when (button.id) {
-            R.id.delete -> doAction(Action.DELETE)
-            R.id.done -> doAction(Action.DONE)
-            R.id.add -> doAction(Action.ADD)
-            R.id.subtract -> doAction(Action.SUBTRACT)
-            R.id.multiply -> doAction(Action.MULTIPLY)
-            R.id.divide -> doAction(Action.DIVIDE)
+            R.id.delete -> doAction(Action.DELETE, button)
+            R.id.done -> doAction(Action.DONE, button)
+            R.id.add -> doAction(Action.ADD, button)
+            R.id.subtract -> doAction(Action.SUBTRACT, button)
+            R.id.multiply -> doAction(Action.MULTIPLY, button)
+            R.id.divide -> doAction(Action.DIVIDE, button)
             else ->
                 if (editText != null) {
                     editText!!.text.insert(editText!!.selectionStart, button.text)
                 }
         }
+        editText?.setSelection(editText!!.text.length)
 
     }
 
-    private fun doAction(action: Action) {
+    private fun doAction(action: Action, button: Button) {
         val text = editText?.text
+        if (action == Action.DELETE) {
+            editText?.text = null
+            return
+        } else if (action == Action.DONE) {
+            editText?.setText(doCalculator(text.toString()))
+            return
+        }
         if (TextUtils.isEmpty(text)) {
+            if (button.text.contains("-")) {
+                editText?.setText("-")
+            }
             return
         }
         text!!
+        if (text.endsWith("+")
+                || text.endsWith("-")
+                || text.endsWith("*")
+                || text.endsWith("/")
+        ) {
+            editText?.setText(text.subSequence(0, text.length - 1).toString() + button.text)
+            return
+        }
         if (!text.contains("+")
                 && !text.contains("-")
                 && !text.contains("*")
                 && !text.contains("/")
         ) {
+            editText?.setText(editText?.text.toString() + button.text)
             return
         }
 
-        editText?.setText(doCalculator(text.toString()))
+        var doCalculator = doCalculator(text.toString())
+        if (action != Action.DONE) {
+            doCalculator = doCalculator.plus(button.text)
+        }
+        editText?.setText(doCalculator)
 
     }
 
-    public fun doCalculator(text: String): String {
-        var replace = text.toString().replace(" ", "")
+    fun doCalculator(text: String?): String {
+        if (text == null) {
+            return ""
+        }
+        var replace = text.replace(" ", "")
         var isMinus = false //第一个数是否为负数
         if (replace.startsWith("-", true)) {
             isMinus = true
@@ -156,7 +183,7 @@ open class KeyBoardView : LinearLayout {
         } else if (replace.startsWith("+", true)) {
             replace = replace.substring(1)
         }
-        var finalString = ""
+        var finalString = replace
         var cs: String? = null
         if (replace.contains("+", true)) {
             cs = "+"
@@ -201,10 +228,24 @@ open class KeyBoardView : LinearLayout {
             }
             val bigDecimalOne = BigDecimal(one.toString())
             val bigDecimalTwo = BigDecimal(two.toString())
-            finalString = bigDecimalOne.divide(bigDecimalTwo).toString()
+            if (bigDecimalTwo.toDouble() == 0.toDouble()) {
+                finalString = "0"
+            } else {
+                finalString = bigDecimalOne.divide(bigDecimalTwo, 10, BigDecimal.ROUND_HALF_UP).toString()
+            }
+        } else if (isMinus) {
+            finalString = text.replace(" ", "")
         }
 
-        return finalString.plus(cs)
+        while (
+                (finalString.endsWith("0") || finalString.endsWith("."))
+//                &&
+//                (finalString.length > 1 && !finalString.startsWith("-")
+//                        )
+        ) {
+            finalString = finalString.substring(0, finalString.length - 1)
+        }
+        return finalString
     }
 
 

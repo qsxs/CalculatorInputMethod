@@ -12,6 +12,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         keyBoardView.setHeaderView(R.layout.header2)
+        keyBoardView.registerEditText(et)
         keyBoardView.setOnHeaderChildClickListener(R.id.header, View.OnClickListener {
             Log.i("TAG ", it.id.toString())
         })
