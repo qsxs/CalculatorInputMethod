@@ -33,6 +33,12 @@
             android:layout_height="wrap_content"
             android:text="Changer Header" />
 
+        <Button
+            android:id="@+id/btnHideable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hideable" />
+
     </LinearLayout>
 
     <com.lihb.library.KeyBoardView
@@ -41,7 +47,8 @@
         android:layout_height="wrap_content"
         android:background="@color/design_bottom_navigation_shadow_color"
         app:header="@layout/header"
+        app:hideable="true"
         tools:behavior_peekHeight="200dp" />
-        <!--app:layout_behavior="@string/bottom_sheet_behavior"-->
-        <!--tools:behavior_peekHeight="200dp" />-->
+    <!--app:layout_behavior="@string/bottom_sheet_behavior"-->
+    <!--tools:behavior_peekHeight="200dp" />-->
 </android.support.design.widget.CoordinatorLayout>

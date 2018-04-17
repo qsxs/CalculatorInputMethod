@@ -2,6 +2,7 @@
 <resources>
     <declare-styleable name="KeyBoardView">
         <attr name="header" format="reference" />
+        <attr name="hideable" format="boolean" />
     </declare-styleable>
 
 </resources>

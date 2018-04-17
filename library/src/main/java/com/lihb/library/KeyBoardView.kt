@@ -12,7 +12,6 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.text.TextUtils
 import android.util.AttributeSet
-import android.util.Log
 import android.view.*
 import android.view.View.OnClickListener
 import android.view.View.OnKeyListener
@@ -29,6 +28,7 @@ open class KeyBoardView : LinearLayout {
     private var contentView: View? = null
     private var onNumberClickListener: OnNumberClickListener? = null
     private var behavior: BottomSheetBehavior<KeyBoardView>? = null
+    private var hideable: Boolean = false
 
     enum class Action {
         DELETE,
@@ -38,39 +38,6 @@ open class KeyBoardView : LinearLayout {
         MULTIPLY,
         DIVIDE,
         OPPOSITE
-    }
-
-    constructor(context: Context) : super(context) {
-        init(context)
-    }
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        init(context, attrs)
-    }
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        init(context, attrs)
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
-        init(context, attrs)
-    }
-
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        //这里最早得知parent
-        initBehavior()
-    }
-
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        super.onLayout(changed, l, t, r, b)
-        //这里最早得知headerView的高度
-        val height =
-                if (headerView == null) 0
-                else headerView!!.measuredHeight
-        Log.i(TAG, "onLayout".plus(height))
-        behavior?.peekHeight = height
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -88,17 +55,20 @@ open class KeyBoardView : LinearLayout {
         })
     }
 
+    fun setHideable(hideable: Boolean) {
+        this.hideable = hideable
+        initPeekHeight()
+    }
+
+    fun getHideable(): Boolean {
+        return hideable
+    }
+
     fun setHeaderView(view: View?) {
         removeView(headerView)
         headerView = view
         if (headerView != null)
             addView(headerView, 0)
-//        initBehavior()
-//        val height =
-//                if (headerView == null) 0
-//                else headerView!!.measuredHeight
-//        Log.i(TAG, "setHeaderView".plus(height))
-//        behavior?.peekHeight = height
         invalidate()
     }
 
@@ -147,11 +117,42 @@ open class KeyBoardView : LinearLayout {
         return false
     }
 
+    constructor(context: Context) : super(context) {
+        init(context)
+    }
+
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+        init(context, attrs)
+    }
+
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        init(context, attrs)
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+        init(context, attrs)
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        //这里最早得知parent
+        initBehavior()
+    }
+
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        super.onLayout(changed, l, t, r, b)
+        //这里最早得知headerView的高度
+        initPeekHeight()
+    }
+
+
     private fun init(context: Context, attrs: AttributeSet? = null) {
         orientation = VERTICAL
         if (attrs != null) {
             val a = context.obtainStyledAttributes(attrs, R.styleable.KeyBoardView, 0, 0)
             val header = a.getResourceId(R.styleable.KeyBoardView_header, 0)
+            hideable = a.getBoolean(R.styleable.KeyBoardView_hideable, false)
             a.recycle()
 
             setHeaderView(header)
@@ -196,6 +197,14 @@ open class KeyBoardView : LinearLayout {
             (layoutParams as CoordinatorLayout.LayoutParams).behavior = BottomSheetBehavior<LinearLayout>()
             behavior = BottomSheetBehavior.from(this)
         }
+    }
+
+    private fun initPeekHeight() {
+        val height =
+                if (headerView == null) 0
+                else headerView!!.measuredHeight
+//        Log.i(TAG, "onLayout".plus(height))
+        behavior?.peekHeight = if (hideable) 0 else height
     }
 
     private fun onButtonClick(button: Button) {
