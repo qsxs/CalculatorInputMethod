@@ -136,21 +136,35 @@ open class KeyBoardView : LinearLayout {
 
     private fun onButtonClick(button: Button) {
         when (button.id) {
-            R.id.delete -> {
-            }
             R.id.done -> doAction(Action.DONE, button)
             R.id.add -> doAction(Action.ADD, button)
             R.id.subtract -> doAction(Action.SUBTRACT, button)
             R.id.multiply -> doAction(Action.MULTIPLY, button)
             R.id.divide -> doAction(Action.DIVIDE, button)
             R.id.decimal -> onDecimalClick(button)
+            R.id.opposite -> onOppositeClick(button)
             else ->
-                if (editText != null) {
-                    editText!!.text.insert(editText!!.selectionStart, button.text)
-                }
+                editText?.text?.insert(editText!!.selectionStart, button.text)
+
         }
 
 
+    }
+
+    /**
+     * 点击取反
+     */
+    private fun onOppositeClick(button: Button) {
+        val text = editText?.text
+        val s =
+                when {
+                    TextUtils.isEmpty(text) -> ""
+                    text!!.startsWith("+") -> "-".plus(text.subSequence(1, text.length))
+                    text.startsWith("-") -> text.substring(1, text.length)
+                    else -> "-".plus(text)
+                }
+        editText?.setText(s)
+        editText?.setSelection(editText!!.text.length)
     }
 
     /**
@@ -197,9 +211,10 @@ open class KeyBoardView : LinearLayout {
         if (TextUtils.isEmpty(text)) {
             if (button.text.contains("-")) {
                 editText?.setText("-")
-            } else {
+            } else if (action != Action.DONE) {
                 editText?.setText("0".plus(button.text))
             }
+            editText?.setSelection(editText!!.text.length)
             return
         }
 
@@ -211,6 +226,7 @@ open class KeyBoardView : LinearLayout {
                         || text.endsWith("/"))
         ) {
             editText?.setText(text.subSequence(0, text.length - 1).toString().plus(button.text))
+            editText?.setSelection(editText!!.text.length)
             return
         }
 
