@@ -4,4 +4,7 @@
     <item
         android:id="@+id/bottom_sheet"
         android:title="bottom_sheet" />
+    <item
+        android:id="@+id/sheet_dialog"
+        android:title="sheet_dialog" />
 </menu>

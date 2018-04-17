@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="register EditText" />
+
+    <Button
+        android:id="@+id/btnUnRegister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="unregister EditText" />
+
+    <Button
+        android:id="@+id/btnChangerHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Changer Header" />
+
+
+</LinearLayout>

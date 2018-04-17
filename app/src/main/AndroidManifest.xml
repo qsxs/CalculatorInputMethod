@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".BottomSheetActivity" />
+        <activity android:name=".BottomSheetDialogActivity" />
     </application>
 
 </manifest>
