@@ -25,7 +25,7 @@ open class KeyBoardView : LinearLayout {
     private var editText: EditText? = null
     private var headerView: View? = null
     private var contentView: View? = null
-    private var onNumberClickListener: OnNumberClickListener? = null
+    private var onButtonClickListener: OnButtonClickListener? = null
     private var behavior: BottomSheetBehavior<KeyBoardView>? = null
     private var hideable: Boolean = false
 
@@ -84,12 +84,12 @@ open class KeyBoardView : LinearLayout {
         return headerView
     }
 
-    fun setOnNumberClickListener(onNumberClickListener: OnNumberClickListener?) {
-        this.onNumberClickListener = onNumberClickListener
+    fun setOnNumberClickListener(onButtonClickListener: OnButtonClickListener?) {
+        this.onButtonClickListener = onButtonClickListener
     }
 
-    fun getOnNumberClickListener(): OnNumberClickListener? {
-        return onNumberClickListener
+    fun getOnNumberClickListener(): OnButtonClickListener? {
+        return onButtonClickListener
     }
 
     fun setOnHeaderChildClickListener(@IdRes idRes: Int, listener: OnClickListener?) {
@@ -171,7 +171,7 @@ open class KeyBoardView : LinearLayout {
         getButtons(contentView as ViewGroup, buttons)
         val onClickListener = OnClickListener {
             onButtonClick(it as Button)
-            onNumberClickListener?.onNumberClick(it)
+            onButtonClickListener?.onNumberClick(it)
         }
         for (button in buttons) {
             button.setOnClickListener(onClickListener)

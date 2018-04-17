@@ -2,6 +2,6 @@ package com.lihb.library
 
 import android.widget.Button
 
-interface OnNumberClickListener {
+interface OnButtonClickListener {
     fun onNumberClick(view: Button)
 }
