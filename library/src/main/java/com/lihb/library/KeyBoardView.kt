@@ -1,20 +1,24 @@
 package com.lihb.library
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
+import android.os.Handler
+import android.os.Message
 import android.support.annotation.IdRes
 import android.support.annotation.LayoutRes
 import android.support.annotation.RequiresApi
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
-import java.math.BigDecimal
+import com.lihb.library.util.CalculatorUtil
 
 
 open class KeyBoardView : LinearLayout {
@@ -111,55 +115,102 @@ open class KeyBoardView : LinearLayout {
         for (button in buttons) {
             button.setOnClickListener(onClickListener)
         }
+        val view = findViewById<View>(R.id.delete)
+        view?.setOnLongClickListener {
+            val msg = Message()
+            msg.arg1 = -1
+            msg.what = DELETE_AUTO
+            deleteHandler.sendMessage(msg)
+            false
+        }
+        view?.setOnClickListener {
+            deleteHandler.sendEmptyMessage(DELETE)
+        }
+        view?.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> deleteHandler.removeCallbacksAndMessages(null)
+            }
+            false
+        }
     }
 
     private fun onButtonClick(button: Button) {
         when (button.id) {
-            R.id.delete -> doAction(Action.DELETE, button)
+            R.id.delete -> {
+            }
             R.id.done -> doAction(Action.DONE, button)
             R.id.add -> doAction(Action.ADD, button)
             R.id.subtract -> doAction(Action.SUBTRACT, button)
             R.id.multiply -> doAction(Action.MULTIPLY, button)
             R.id.divide -> doAction(Action.DIVIDE, button)
+            R.id.decimal -> onDecimalClick(button)
             else ->
                 if (editText != null) {
                     editText!!.text.insert(editText!!.selectionStart, button.text)
                 }
         }
-        editText?.setSelection(editText!!.text.length)
 
+
+    }
+
+    /**
+     * 点击小数点
+     */
+    private fun onDecimalClick(button: Button) {
+        // 在光标之后加入字符
+        val text = editText?.text
+        val finalString: String
+        val cs = '.'
+        if (TextUtils.isEmpty(text)) {
+            finalString = "0."
+        } else {
+            text!!
+            val lastChar = text[text.length - 1]
+            finalString =
+                    if (lastChar == '+'
+                            || lastChar == '-'
+                            || lastChar == '*'
+                            || lastChar == '/') {
+                        text.toString().plus("0.")
+                    } else {
+                        val s =
+                                when {
+                                    text.contains("+") -> text.split("+")[1]
+                                    text.contains("-") -> text.split("-")[1]
+                                    text.contains("*") -> text.split("*")[1]
+                                    text.contains("/") -> text.split("/")[1]
+                                    else -> text
+                                }
+                        if (!s.contains(".")) {
+                            text.toString().plus(cs)
+                        } else {
+                            text.toString()
+                        }
+                    }
+        }
+        editText?.setText(finalString)
+        editText?.setSelection(editText!!.text.length)
     }
 
     private fun doAction(action: Action, button: Button) {
         val text = editText?.text
-        if (action == Action.DELETE) {
-            editText?.text = null
-            return
-        } else if (action == Action.DONE) {
-            editText?.setText(doCalculator(text.toString()))
-            return
-        }
         if (TextUtils.isEmpty(text)) {
             if (button.text.contains("-")) {
                 editText?.setText("-")
+            } else {
+                editText?.setText("0".plus(button.text))
             }
             return
         }
+
         text!!
-        if (text.endsWith("+")
-                || text.endsWith("-")
-                || text.endsWith("*")
-                || text.endsWith("/")
+        if (action != Action.DONE
+                && (text.endsWith("+")
+                        || text.endsWith("-")
+                        || text.endsWith("*")
+                        || text.endsWith("/"))
         ) {
-            editText?.setText(text.subSequence(0, text.length - 1).toString() + button.text)
-            return
-        }
-        if (!text.contains("+")
-                && !text.contains("-")
-                && !text.contains("*")
-                && !text.contains("/")
-        ) {
-            editText?.setText(editText?.text.toString() + button.text)
+            editText?.setText(text.subSequence(0, text.length - 1).toString().plus(button.text))
             return
         }
 
@@ -168,86 +219,64 @@ open class KeyBoardView : LinearLayout {
             doCalculator = doCalculator.plus(button.text)
         }
         editText?.setText(doCalculator)
-
+        editText?.setSelection(editText!!.text.length)
     }
 
-    fun doCalculator(text: String?): String {
-        if (text == null) {
-            return ""
-        }
-        var replace = text.replace(" ", "")
-        var isMinus = false //第一个数是否为负数
-        if (replace.startsWith("-", true)) {
-            isMinus = true
-            replace = replace.substring(1)
-        } else if (replace.startsWith("+", true)) {
-            replace = replace.substring(1)
-        }
-        var finalString = replace
-        var cs: String? = null
-        if (replace.contains("+", true)) {
-            cs = "+"
-            val addIndex = replace.indexOf(cs)
-            var one = replace.subSequence(0, addIndex)
-            val two = replace.subSequence(addIndex + 1, replace.length)
-            if (isMinus) {
-                one = "-".plus(one)
-            }
-            val bigDecimalOne = BigDecimal(one.toString())
-            val bigDecimalTwo = BigDecimal(two.toString())
-            finalString = bigDecimalOne.add(bigDecimalTwo).toString()
-        } else if (replace.contains("-", true)) {
-            cs = "-"
-            val addIndex = replace.indexOf(cs)
-            var one = replace.subSequence(0, addIndex)
-            val two = replace.subSequence(addIndex + 1, replace.length)
-            if (isMinus) {
-                one = "-".plus(one)
-            }
-            val bigDecimalOne = BigDecimal(one.toString())
-            val bigDecimalTwo = BigDecimal(two.toString())
-            finalString = bigDecimalOne.subtract(bigDecimalTwo).toString()
-        } else if (replace.contains("*", true)) {
-            cs = "*"
-            val addIndex = replace.indexOf(cs)
-            var one = replace.subSequence(0, addIndex)
-            val two = replace.subSequence(addIndex + 1, replace.length)
-            if (isMinus) {
-                one = "-".plus(one)
-            }
-            val bigDecimalOne = BigDecimal(one.toString())
-            val bigDecimalTwo = BigDecimal(two.toString())
-            finalString = bigDecimalOne.multiply(bigDecimalTwo).toString()
-        } else if (replace.contains("/", true)) {
-            cs = "/"
-            val addIndex = replace.indexOf(cs)
-            var one = replace.subSequence(0, addIndex)
-            val two = replace.subSequence(addIndex + 1, replace.length)
-            if (isMinus) {
-                one = "-".plus(one)
-            }
-            val bigDecimalOne = BigDecimal(one.toString())
-            val bigDecimalTwo = BigDecimal(two.toString())
-            if (bigDecimalTwo.toDouble() == 0.toDouble()) {
-                finalString = "0"
-            } else {
-                finalString = bigDecimalOne.divide(bigDecimalTwo, 10, BigDecimal.ROUND_HALF_UP).toString()
-            }
-        } else if (isMinus) {
-            finalString = text.replace(" ", "")
-        }
-
-        while (
-                (finalString.endsWith("0") || finalString.endsWith("."))
-//                &&
-//                (finalString.length > 1 && !finalString.startsWith("-")
-//                        )
-        ) {
-            finalString = finalString.substring(0, finalString.length - 1)
-        }
-        return finalString
+    private fun doCalculator(text: String?): String {
+        return CalculatorUtil.simpleCalculator(text, 2)
     }
 
+
+    /**
+     * 删除对应标识
+     */
+    private val DELETE = 200
+    private val DELETE_AUTO = 400
+
+    /**
+     * 删除速度
+     */
+    private val DELETE_SPEED = 50
+    /**
+     * 删除处理
+     */
+    private val deleteHandler = @SuppressLint("HandlerLeak")
+    object : Handler() {
+
+        override fun handleMessage(msg: Message) {
+            when (msg.what) {
+                DELETE -> deleteText()
+                DELETE_AUTO -> {
+                    deleteText()
+                    if (msg.arg1 == -1) {
+                        msg.arg1 = DELETE_SPEED
+                    }
+                    val speed = if (msg.arg1 > 0) --msg.arg1 else 0
+                    val message = obtainMessage()
+                    message.what = DELETE_AUTO
+                    message.arg1 = speed
+                    sendMessageDelayed(message, speed.toLong())
+                }
+            }
+        }
+    }
+
+    /**
+     * 从输入框删除文字
+     */
+    private fun deleteText() {
+        if (editText == null) {
+            return
+        }
+        val currPos = editText!!.selectionEnd
+        if (-1 == currPos)
+            return  // 错误
+        if (0 == currPos)
+            return  // 已经删完
+        val text = editText?.text
+        text?.delete(currPos - 1, currPos)
+        editText?.setSelection(editText!!.selectionEnd)
+    }
 
     /**
      * 获取viewGroup下所有button
