@@ -8,13 +8,13 @@ import android.os.Message
 import android.support.annotation.IdRes
 import android.support.annotation.LayoutRes
 import android.support.annotation.RequiresApi
+import android.support.design.widget.BottomSheetBehavior
+import android.support.design.widget.CoordinatorLayout
 import android.text.TextUtils
 import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
+import android.view.*
 import android.view.View.OnClickListener
-import android.view.ViewGroup
+import android.view.View.OnKeyListener
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -26,6 +26,7 @@ open class KeyBoardView : LinearLayout {
     private var headerView: View? = null
     private var contentView: View? = null
     private var onNumberClickListener: OnNumberClickListener? = null
+    private var behavior: BottomSheetBehavior<KeyBoardView>? = null
 
     enum class Action {
         DELETE,
@@ -54,14 +55,33 @@ open class KeyBoardView : LinearLayout {
         init(context, attrs)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     fun registerEditText(view: EditText?) {
         editText = view
+        editText?.setOnTouchListener({ _, _ ->
+            show()
+//            false
+        })
+        editText?.setOnKeyListener(OnKeyListener { v, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                dismiss()
+            } else {
+                false
+            }
+        })
     }
 
     fun setHeaderView(view: View?) {
         removeView(headerView)
         headerView = view
         addView(headerView, 0)
+        if (behavior == null) {
+            behavior = BottomSheetBehavior.from(this)
+        }
+        val height =
+                if (headerView == null) 0
+                else headerView!!.height
+        behavior?.peekHeight = height
         invalidate()
     }
 
@@ -86,7 +106,40 @@ open class KeyBoardView : LinearLayout {
         headerView?.findViewById<View>(idRes)?.setOnClickListener(listener)
     }
 
+    fun show(): Boolean {
+        if (parent is CoordinatorLayout) {
+            if (behavior == null) {
+                behavior = BottomSheetBehavior.from(this)
+            }
+            return if (behavior!!.state != BottomSheetBehavior.STATE_EXPANDED) {
+                behavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                true
+            } else {
+                false
+            }
+        }
+        return false
+    }
+
+    fun dismiss(): Boolean {
+        if (parent is CoordinatorLayout) {
+            if (behavior == null) {
+                behavior = BottomSheetBehavior.from(this)
+            }
+            return if (behavior!!.state != BottomSheetBehavior.STATE_COLLAPSED) {
+                behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+                true
+            } else {
+                false
+            }
+        }
+        return false
+    }
+
     private fun init(context: Context, attrs: AttributeSet? = null) {
+        if (parent is CoordinatorLayout) {
+            behavior = BottomSheetBehavior.from(this)
+        }
         orientation = VERTICAL
         if (attrs != null) {
             val a = context.obtainStyledAttributes(attrs, R.styleable.KeyBoardView, 0, 0)
@@ -98,6 +151,7 @@ open class KeyBoardView : LinearLayout {
         }
         if (headerView != null) {
             addView(headerView)
+            behavior?.peekHeight = headerView!!.height
         }
 
         contentView = LayoutInflater.from(context).inflate(R.layout.view_keyboard, this, false)
@@ -147,8 +201,6 @@ open class KeyBoardView : LinearLayout {
                 editText?.text?.insert(editText!!.selectionStart, button.text)
 
         }
-
-
     }
 
     /**
@@ -242,7 +294,6 @@ open class KeyBoardView : LinearLayout {
         return CalculatorUtil.simpleCalculator(text, 2)
     }
 
-
     /**
      * 删除对应标识
      */
@@ -253,12 +304,12 @@ open class KeyBoardView : LinearLayout {
      * 删除速度
      */
     private val DELETE_SPEED = 50
+
     /**
      * 删除处理
      */
     private val deleteHandler = @SuppressLint("HandlerLeak")
     object : Handler() {
-
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 DELETE -> deleteText()

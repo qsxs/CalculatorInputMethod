@@ -1,20 +1,17 @@
 package com.lihb.calculatorinputmethod
 
-import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
-
+class BottomSheetActivity:AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_bottom_sheet)
+        keyBoardView.registerEditText(et)
         btnRegister.setOnClickListener({
             keyBoardView.registerEditText(et)
         })
@@ -34,22 +31,5 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(it.context, "header onClick", Toast.LENGTH_SHORT).show()
             })
         })
-        keyBoardView.setOnHeaderChildClickListener(R.id.header, View.OnClickListener {
-            Toast.makeText(it.context, "header onClick", Toast.LENGTH_SHORT).show()
-        })
-//        keyBoardView.setHeaderView(R.layout.header2)
-//        keyBoardView.registerEditText(et)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
-            R.id.bottom_sheet -> startActivity(Intent(this, BottomSheetActivity::class.java))
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main, menu)
-        return super.onCreateOptionsMenu(menu)
     }
 }
