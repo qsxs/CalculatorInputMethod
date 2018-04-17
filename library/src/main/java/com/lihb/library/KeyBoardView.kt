@@ -2,6 +2,7 @@ package com.lihb.library
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Canvas
 import android.os.Build
 import android.os.Handler
 import android.os.Message
@@ -12,6 +13,7 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.text.TextUtils
 import android.util.AttributeSet
+import android.util.Log
 import android.view.*
 import android.view.View.OnClickListener
 import android.view.View.OnKeyListener
@@ -22,6 +24,7 @@ import com.lihb.library.util.CalculatorUtil
 
 
 open class KeyBoardView : LinearLayout {
+    private val TAG = "KeyBoardView"
     private var editText: EditText? = null
     private var headerView: View? = null
     private var contentView: View? = null
@@ -55,6 +58,25 @@ open class KeyBoardView : LinearLayout {
         init(context, attrs)
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        initBehavior()
+
+    }
+
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        super.onLayout(changed, l, t, r, b)
+        val height =
+                if (headerView == null) 0
+                else headerView!!.measuredHeight
+        Log.i(TAG, "onLayout".plus(height))
+        behavior?.peekHeight = height
+    }
+
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     fun registerEditText(view: EditText?) {
         editText = view
@@ -74,14 +96,14 @@ open class KeyBoardView : LinearLayout {
     fun setHeaderView(view: View?) {
         removeView(headerView)
         headerView = view
-        addView(headerView, 0)
-        if (behavior == null) {
-            behavior = BottomSheetBehavior.from(this)
-        }
-        val height =
-                if (headerView == null) 0
-                else headerView!!.height
-        behavior?.peekHeight = height
+        if (headerView != null)
+            addView(headerView, 0)
+//        initBehavior()
+//        val height =
+//                if (headerView == null) 0
+//                else headerView!!.measuredHeight
+//        Log.i(TAG, "setHeaderView".plus(height))
+//        behavior?.peekHeight = height
         invalidate()
     }
 
@@ -108,9 +130,7 @@ open class KeyBoardView : LinearLayout {
 
     fun show(): Boolean {
         if (parent is CoordinatorLayout) {
-            if (behavior == null) {
-                behavior = BottomSheetBehavior.from(this)
-            }
+            initBehavior()
             return if (behavior!!.state != BottomSheetBehavior.STATE_EXPANDED) {
                 behavior?.state = BottomSheetBehavior.STATE_EXPANDED
                 true
@@ -123,9 +143,7 @@ open class KeyBoardView : LinearLayout {
 
     fun dismiss(): Boolean {
         if (parent is CoordinatorLayout) {
-            if (behavior == null) {
-                behavior = BottomSheetBehavior.from(this)
-            }
+            initBehavior()
             return if (behavior!!.state != BottomSheetBehavior.STATE_COLLAPSED) {
                 behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
                 true
@@ -137,21 +155,13 @@ open class KeyBoardView : LinearLayout {
     }
 
     private fun init(context: Context, attrs: AttributeSet? = null) {
-        if (parent is CoordinatorLayout) {
-            behavior = BottomSheetBehavior.from(this)
-        }
         orientation = VERTICAL
         if (attrs != null) {
             val a = context.obtainStyledAttributes(attrs, R.styleable.KeyBoardView, 0, 0)
             val header = a.getResourceId(R.styleable.KeyBoardView_header, 0)
             a.recycle()
-            if (header != 0) {
-                headerView = LayoutInflater.from(context).inflate(header, this, false)
-            }
-        }
-        if (headerView != null) {
-            addView(headerView)
-            behavior?.peekHeight = headerView!!.height
+
+            setHeaderView(header)
         }
 
         contentView = LayoutInflater.from(context).inflate(R.layout.view_keyboard, this, false)
@@ -185,6 +195,12 @@ open class KeyBoardView : LinearLayout {
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> deleteHandler.removeCallbacksAndMessages(null)
             }
             false
+        }
+    }
+
+    private fun initBehavior() {
+        if (parent is CoordinatorLayout && behavior == null) {
+            behavior = BottomSheetBehavior.from(this)
         }
     }
 

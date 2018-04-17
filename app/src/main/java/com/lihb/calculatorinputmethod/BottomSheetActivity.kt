@@ -18,14 +18,16 @@ class BottomSheetActivity:AppCompatActivity() {
         btnUnRegister.setOnClickListener({
             keyBoardView.registerEditText(null)
         })
-        var b = true
+        var i = 0
         btnChangerHeader.setOnClickListener({
-            b = if (b) {
-                keyBoardView.setHeaderView(R.layout.header2)
-                false
-            } else {
-                keyBoardView.setHeaderView(R.layout.header)
-                true
+            when (i) {
+                0 -> keyBoardView.setHeaderView(R.layout.header2)
+                1 -> keyBoardView.setHeaderView(null)
+                else -> keyBoardView.setHeaderView(R.layout.header)
+            }
+            i++
+            if (i == 3) {
+                i = 0
             }
             keyBoardView.setOnHeaderChildClickListener(R.id.header, View.OnClickListener {
                 Toast.makeText(it.context, "header onClick", Toast.LENGTH_SHORT).show()
