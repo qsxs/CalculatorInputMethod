@@ -14,7 +14,6 @@ import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.*
 import android.view.View.OnClickListener
-import android.view.View.OnKeyListener
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -42,11 +41,15 @@ open class KeyBoardView : LinearLayout {
 
     @SuppressLint("ClickableViewAccessibility")
     fun registerEditText(view: EditText?) {
+        if (view == null) {
+            editText?.setOnTouchListener(null)
+            editText?.setOnKeyListener(null)
+        }
         editText = view
         editText?.setOnTouchListener({ _, _ ->
             show()
         })
-        editText?.setOnKeyListener(OnKeyListener { v, keyCode, event ->
+        editText?.setOnKeyListener({ _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 dismiss()
             } else {
@@ -101,7 +104,7 @@ open class KeyBoardView : LinearLayout {
                 return true
             }
         }
-        return editText == null
+        return editText != null
     }
 
     fun dismiss(): Boolean {

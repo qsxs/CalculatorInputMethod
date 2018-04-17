@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:background="@color/design_bottom_navigation_shadow_color"
         app:header="@layout/header"
-        app:hideable="true"
+        app:hideable="false"
         tools:behavior_peekHeight="200dp" />
     <!--app:layout_behavior="@string/bottom_sheet_behavior"-->
     <!--tools:behavior_peekHeight="200dp" />-->
