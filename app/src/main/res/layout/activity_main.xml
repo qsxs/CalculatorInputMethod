@@ -12,15 +12,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <android.support.v4.widget.NestedScrollView
+    <Button
+        android:id="@+id/btnRegister"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:text="register EditText" />
 
+    <Button
+        android:id="@+id/btnUnRegister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="unregister EditText" />
 
-        <com.lihb.library.KeyBoardView
-            android:id="@+id/keyBoardView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:header="@layout/header" />
-    </android.support.v4.widget.NestedScrollView>
+    <Button
+        android:id="@+id/btnChangerHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Changer Header" />
+
+    <com.lihb.library.KeyBoardView
+        android:id="@+id/keyBoardView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:header="@layout/header" />
 </LinearLayout>
