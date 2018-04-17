@@ -2,7 +2,6 @@ package com.lihb.library
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
 import android.os.Build
 import android.os.Handler
 import android.os.Message
@@ -60,12 +59,13 @@ open class KeyBoardView : LinearLayout {
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        //这里最早得知parent
         initBehavior()
-
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
+        //这里最早得知headerView的高度
         val height =
                 if (headerView == null) 0
                 else headerView!!.measuredHeight
@@ -73,16 +73,11 @@ open class KeyBoardView : LinearLayout {
         behavior?.peekHeight = height
     }
 
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     fun registerEditText(view: EditText?) {
         editText = view
         editText?.setOnTouchListener({ _, _ ->
             show()
-//            false
         })
         editText?.setOnKeyListener(OnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -131,14 +126,12 @@ open class KeyBoardView : LinearLayout {
     fun show(): Boolean {
         if (parent is CoordinatorLayout) {
             initBehavior()
-            return if (behavior!!.state != BottomSheetBehavior.STATE_EXPANDED) {
+            if (behavior!!.state != BottomSheetBehavior.STATE_EXPANDED) {
                 behavior?.state = BottomSheetBehavior.STATE_EXPANDED
-                true
-            } else {
-                false
+                return true
             }
         }
-        return false
+        return editText == null
     }
 
     fun dismiss(): Boolean {
@@ -200,6 +193,7 @@ open class KeyBoardView : LinearLayout {
 
     private fun initBehavior() {
         if (parent is CoordinatorLayout && behavior == null) {
+            (layoutParams as CoordinatorLayout.LayoutParams).behavior = BottomSheetBehavior<LinearLayout>()
             behavior = BottomSheetBehavior.from(this)
         }
     }
