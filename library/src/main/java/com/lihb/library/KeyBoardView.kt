@@ -171,7 +171,7 @@ open class KeyBoardView : LinearLayout {
         getButtons(contentView as ViewGroup, buttons)
         val onClickListener = OnClickListener {
             onButtonClick(it as Button)
-            onButtonClickListener?.onNumberClick(it)
+            onButtonClickListener?.onButtonClick(it)
         }
         for (button in buttons) {
             button.setOnClickListener(onClickListener)
