@@ -1,7 +1,7 @@
 package com.lihb.library
 
-import android.widget.Button
+import android.view.View
 
 interface OnButtonClickListener {
-    fun onButtonClick(view: Button)
+    fun onButtonClick(view: View)
 }

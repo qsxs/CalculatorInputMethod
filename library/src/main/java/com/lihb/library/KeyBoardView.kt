@@ -14,9 +14,9 @@ import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.*
 import android.view.View.OnClickListener
-import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.TextView
 import com.lihb.library.util.CalculatorUtil
 
 
@@ -28,6 +28,7 @@ open class KeyBoardView : LinearLayout {
     private var onButtonClickListener: OnButtonClickListener? = null
     private var behavior: BottomSheetBehavior<KeyBoardView>? = null
     private var hideable: Boolean = false
+    private var show: Boolean = false
 
     enum class Action {
         DELETE,
@@ -132,6 +133,7 @@ open class KeyBoardView : LinearLayout {
         init(context, attrs)
     }
 
+    @RequiresApi(Build.VERSION_CODES.HONEYCOMB)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         init(context, attrs)
     }
@@ -151,6 +153,11 @@ open class KeyBoardView : LinearLayout {
         super.onLayout(changed, l, t, r, b)
         //这里最早得知headerView的高度
         initPeekHeight()
+        if (show) {
+            behavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        } else {
+            behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
     }
 
 
@@ -160,6 +167,7 @@ open class KeyBoardView : LinearLayout {
             val a = context.obtainStyledAttributes(attrs, R.styleable.KeyBoardView, 0, 0)
             val header = a.getResourceId(R.styleable.KeyBoardView_header, 0)
             hideable = a.getBoolean(R.styleable.KeyBoardView_hideable, false)
+            show = a.getBoolean(R.styleable.KeyBoardView_show, false)
             a.recycle()
 
             setHeaderView(header)
@@ -168,13 +176,26 @@ open class KeyBoardView : LinearLayout {
         contentView = LayoutInflater.from(context).inflate(R.layout.view_keyboard, this, false)
         addView(contentView)
         initViews()
+
+//        var textView = contentView?.findViewById<TextView>(R.id.delete)
+//        val html = "<img src='" + R.drawable.keyboard_delete + "'/>"
+//        val reslut = Html.fromHtml(html, Html.ImageGetter { s ->
+//            //获取资源ID
+//            val resId = Integer.parseInt(s)
+//            //装载图像资源
+//            val drawable = resources.getDrawable(resId)
+//            //设置图像按原始大小显示
+//            drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+//            drawable
+//        }, null)
+//        textView?.text = reslut
     }
 
     private fun initViews() {
-        val buttons = ArrayList<Button>()
-        getButtons(contentView as ViewGroup, buttons)
+        val buttons = ArrayList<TextView>()
+        getTextViews(contentView as ViewGroup, buttons)
         val onClickListener = OnClickListener {
-            onButtonClick(it as Button)
+            onButtonClick(it)
             onButtonClickListener?.onButtonClick(it)
         }
         for (button in buttons) {
@@ -214,7 +235,7 @@ open class KeyBoardView : LinearLayout {
         behavior?.peekHeight = if (hideable) 0 else height
     }
 
-    private fun onButtonClick(button: Button) {
+    private fun onButtonClick(button: View) {
         when (button.id) {
             R.id.done -> doAction(Action.DONE, button)
             R.id.add -> doAction(Action.ADD, button)
@@ -224,7 +245,7 @@ open class KeyBoardView : LinearLayout {
             R.id.decimal -> onDecimalClick(button)
             R.id.opposite -> onOppositeClick(button)
             else ->
-                editText?.text?.insert(editText!!.selectionStart, button.text)
+                editText?.text?.insert(editText!!.selectionStart, (button as TextView).text)
 
         }
     }
@@ -232,7 +253,7 @@ open class KeyBoardView : LinearLayout {
     /**
      * 点击取反
      */
-    private fun onOppositeClick(button: Button) {
+    private fun onOppositeClick(button: View) {
         val text = editText?.text
         val s =
                 when {
@@ -248,7 +269,7 @@ open class KeyBoardView : LinearLayout {
     /**
      * 点击小数点
      */
-    private fun onDecimalClick(button: Button) {
+    private fun onDecimalClick(button: View) {
         // 在光标之后加入字符
         val text = editText?.text
         val finalString: String
@@ -284,7 +305,8 @@ open class KeyBoardView : LinearLayout {
         editText?.setSelection(editText!!.text.length)
     }
 
-    private fun doAction(action: Action, button: Button) {
+    private fun doAction(action: Action, button: View) {
+        button as TextView
         val text = editText?.text
         if (TextUtils.isEmpty(text)) {
             if (button.text.contains("-")) {
@@ -374,18 +396,18 @@ open class KeyBoardView : LinearLayout {
     /**
      * 获取viewGroup下所有button
      */
-    private fun getButtons(viewGroup: ViewGroup?, buttons: MutableList<Button>) {
+    private fun getTextViews(viewGroup: ViewGroup?, buttons: MutableList<TextView>) {
         if (viewGroup == null) {
             return
         }
         val count = viewGroup.childCount
         for (i in 0 until count) {
             val view = viewGroup.getChildAt(i)
-            if (view is Button) { // 若是Button记录下
+            if (view is TextView) { // 若是Button记录下
                 buttons.add(view)
             } else if (view is ViewGroup) {
                 // 若是布局控件（LinearLayout或RelativeLayout）,继续查询子View
-                this.getButtons(view, buttons)
+                this.getTextViews(view, buttons)
             }
         }
     }
