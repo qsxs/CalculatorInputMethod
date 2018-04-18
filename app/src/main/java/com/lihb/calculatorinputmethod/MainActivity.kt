@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.bottom_sheet -> startActivity(Intent(this, BottomSheetActivity::class.java))
-            R.id.sheet_dialog -> startActivity(Intent(this, BottomSheetDialogActivity::class.java))
+            R.id.sheet_dialog -> startActivity(Intent(this, PopupWindowActivity::class.java))
         }
         return super.onOptionsItemSelected(item)
     }

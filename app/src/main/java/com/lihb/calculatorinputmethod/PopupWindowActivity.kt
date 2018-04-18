@@ -4,21 +4,22 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Toast
-import com.lihb.library.KeyBoardSheetDialogFragment
+import com.lihb.library.KeyBoardPopupWindow
 import kotlinx.android.synthetic.main.activity_bottom_sheet_dialog.*
 
-class BottomSheetDialogActivity : AppCompatActivity() {
+class PopupWindowActivity : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bottom_sheet_dialog)
-        val keyBoardView = KeyBoardSheetDialogFragment()
+        val keyBoardView = KeyBoardPopupWindow(this)
+        keyBoardView.registerEditText(et)
         btnRegister.setOnClickListener({
-            keyBoardView.registerEditText(et,supportFragmentManager)
+            keyBoardView.registerEditText(et)
         })
         btnUnRegister.setOnClickListener({
-            keyBoardView.registerEditText(null,supportFragmentManager)
+            keyBoardView.registerEditText(null)
         })
         var i = 0
         btnChangerHeader.setOnClickListener({
@@ -35,5 +36,7 @@ class BottomSheetDialogActivity : AppCompatActivity() {
                 Toast.makeText(it.context, "header onClick", Toast.LENGTH_SHORT).show()
             })
         })
+
+//        KeyBoardPopupWindow.register(et)
     }
 }

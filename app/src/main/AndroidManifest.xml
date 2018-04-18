@@ -17,7 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".BottomSheetActivity" />
-        <activity android:name=".BottomSheetDialogActivity" />
+        <activity android:name=".PopupWindowActivity" />
     </application>
 
 </manifest>

@@ -39,6 +39,10 @@ open class KeyBoardView : LinearLayout {
         OPPOSITE
     }
 
+    fun setEditText(view: EditText?) {
+        editText = view
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     fun registerEditText(view: EditText?) {
         if (view == null) {
