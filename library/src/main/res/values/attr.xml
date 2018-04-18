@@ -4,6 +4,9 @@
         <attr name="header" format="reference" />
         <attr name="hideable" format="boolean" />
         <attr name="show" format="boolean" />
+        <attr name="textSize" format="dimension" />
+        <attr name="textColor" format="color" />
+        <attr name="keyBackground" format="reference|color" />
     </declare-styleable>
 
 </resources>

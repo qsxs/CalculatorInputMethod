@@ -48,6 +48,9 @@
         android:background="@color/design_bottom_navigation_shadow_color"
         app:header="@layout/header"
         app:hideable="false"
+        app:textSize="12sp"
+        app:textColor="#123456"
+        app:keyBackground="#666"
         app:show="true"
         tools:behavior_peekHeight="200dp" />
     <!--app:layout_behavior="@string/bottom_sheet_behavior"-->

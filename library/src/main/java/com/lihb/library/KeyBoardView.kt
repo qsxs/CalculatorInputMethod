@@ -2,6 +2,8 @@ package com.lihb.library
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Handler
 import android.os.Message
@@ -29,6 +31,9 @@ open class KeyBoardView : LinearLayout {
     private var behavior: BottomSheetBehavior<KeyBoardView>? = null
     private var hideable: Boolean = false
     private var show: Boolean = false
+    private var textSize: Float = (-1).toFloat()
+    private var textColor: Int = Color.TRANSPARENT
+    private var keyBackground: Drawable? = null
 
     enum class Action {
         DELETE,
@@ -160,7 +165,6 @@ open class KeyBoardView : LinearLayout {
         }
     }
 
-
     private fun init(context: Context, attrs: AttributeSet? = null) {
         orientation = VERTICAL
         if (attrs != null) {
@@ -168,6 +172,9 @@ open class KeyBoardView : LinearLayout {
             val header = a.getResourceId(R.styleable.KeyBoardView_header, 0)
             hideable = a.getBoolean(R.styleable.KeyBoardView_hideable, false)
             show = a.getBoolean(R.styleable.KeyBoardView_show, false)
+            textSize = a.getDimension(R.styleable.KeyBoardView_textSize, (-1).toFloat())
+            textColor = a.getColor(R.styleable.KeyBoardView_textColor, Color.TRANSPARENT)
+            keyBackground = a.getDrawable(R.styleable.KeyBoardView_keyBackground)
             a.recycle()
 
             setHeaderView(header)
@@ -200,6 +207,12 @@ open class KeyBoardView : LinearLayout {
         }
         for (button in buttons) {
             button.setOnClickListener(onClickListener)
+            if (textSize > 0)
+                button.textSize = textSize
+            if (textColor != Color.TRANSPARENT)
+                button.setTextColor(textColor)
+            if (keyBackground != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                button.background = keyBackground
         }
         val view = findViewById<View>(R.id.delete)
         view?.setOnLongClickListener {
