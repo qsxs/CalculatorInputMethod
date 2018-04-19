@@ -72,17 +72,14 @@ open class KeyBoardView : LinearLayout {
     @SuppressLint("ClickableViewAccessibility")
     fun registerEditText(view: EditText?) {
         if (view == null) {
-            editText?.setOnClickListener(null)
-            editText?.setOnLongClickListener(null)
+            editText?.setOnTouchListener(null)
             editText?.setOnKeyListener(null)
         }
         editText = view
-        editText?.setOnClickListener {
+        editText?.setOnTouchListener { _, _ ->
             show()
         }
-        editText?.setOnLongClickListener {
-            show()
-        }
+
         editText?.setOnKeyListener({ _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 dismiss()
@@ -428,7 +425,8 @@ open class KeyBoardView : LinearLayout {
             else -> {
                 editText?.text?.let {
                     val lastIndexOf = it.lastIndexOf(".")
-                    if (decimalSize >= 0
+                    if (decimalSize >= 0//大于等于0，表示设置了限制
+                            && lastIndexOf >= 0//大于等于0表示包含了小数点
                             && lastIndexOf + decimalSize < it.length
 //                            && lastIndexOf+1 < it.length
                             && !it.subSequence(lastIndexOf + 1, it.length).contains('+')
@@ -440,17 +438,6 @@ open class KeyBoardView : LinearLayout {
                     } else {
                         it.insert(editText!!.selectionStart, (button as TextView).text)
                     }
-//                    if (!TextUtils.isEmpty(it)
-//                            && it.length >= 4
-//                            && it[it.length - 3] == '.'
-//                            && it[it.length - 1] != '+'
-//                            && it[it.length - 1] != '-'
-//                            && it[it.length - 1] != '*'
-//                            && it[it.length - 1] != '/'
-//                    ) {
-////                    超过两位小数了
-//                    } else
-//                        it.insert(editText!!.selectionStart, (button as TextView).text)
                 }
 
             }
