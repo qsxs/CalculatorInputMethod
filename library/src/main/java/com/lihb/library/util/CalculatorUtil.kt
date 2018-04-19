@@ -113,8 +113,8 @@ class CalculatorUtil {
 
             while (
                     !TextUtils.isEmpty(finalString)
-                    &&
-                    (finalString!!.endsWith("0") || finalString.endsWith("."))
+                    && finalString!!.contains(".")
+                    && (finalString.endsWith("0") || finalString.endsWith("."))
             ) {
                 finalString = finalString.substring(0, finalString.length - 1)
             }
