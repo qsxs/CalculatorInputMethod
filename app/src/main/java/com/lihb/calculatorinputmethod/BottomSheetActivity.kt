@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import com.lihb.library.KeyBoardView
+import com.lihb.library.OnDecimalSizeOutOfBoundsListener
 import com.lihb.library.OnStateChangedListener
 import kotlinx.android.synthetic.main.activity_bottom_sheet.*
 
@@ -85,6 +87,12 @@ class BottomSheetActivity : AppCompatActivity() {
 
             override fun onDismiss(keyboardView: KeyBoardView) {
                 Log.i("TAG", "onDismiss")
+            }
+        })
+
+        keyBoardView.setOnDecimalSizeOutOfBoundsListener(object : OnDecimalSizeOutOfBoundsListener {
+            override fun onDecimalSizeOutOfBounds(et: EditText, decimalSize: Int) {
+                Toast.makeText(this@BottomSheetActivity, "最多支持$decimalSize 位小数", Toast.LENGTH_SHORT).show()
             }
         })
     }

@@ -30,15 +30,27 @@ open class KeyBoardView : LinearLayout {
     private var editText: EditText? = null
     private var headerView: View? = null
     private var contentView: View? = null
-    private var onButtonClickListener: OnKeyClickListener? = null
-    private var onStateChangedListener: OnStateChangedListener? = null
     private var behavior: BottomSheetBehavior<KeyBoardView>? = null
-    private var hideable: Boolean = false
-    private var show: Boolean = false
-    private var textSize: Float = (-1).toFloat()
-    private var textColor: Int = Color.TRANSPARENT
-    private var keyBackground: Drawable? = null
-    private var mBackgroundResource: Int = 0
+    /**
+     * 键盘点击监听
+     */
+    private var onButtonClickListener: OnKeyClickListener? = null
+    /**
+     * 键盘状态改变监听
+     */
+    private var onStateChangedListener: OnStateChangedListener? = null
+    /**
+     * 输入小数部分超过限制监听
+     */
+    private var onDecimalSizeOutOfBoundsListener: OnDecimalSizeOutOfBoundsListener? = null
+
+    private var hideable: Boolean = false//dismiss时是否隐藏头部
+    private var show: Boolean = false//初始时状态
+    private var textSize: Float = (-1).toFloat()//字体大小
+    private var textColor: Int = Color.TRANSPARENT//字体颜色
+    private var keyBackground: Drawable? = null//按键背景
+    private var mBackgroundResource: Int = 0//按键背景ResourceId
+    private var decimalSize: Int = -1//允许的小数位数
 
     enum class Action {
         DELETE,
@@ -54,16 +66,23 @@ open class KeyBoardView : LinearLayout {
         editText = view
     }
 
+    /**
+     * 注册到edittext
+     */
     @SuppressLint("ClickableViewAccessibility")
     fun registerEditText(view: EditText?) {
         if (view == null) {
-            editText?.setOnTouchListener(null)
+            editText?.setOnClickListener(null)
+            editText?.setOnLongClickListener(null)
             editText?.setOnKeyListener(null)
         }
         editText = view
-        editText?.setOnTouchListener({ _, _ ->
+        editText?.setOnClickListener {
             show()
-        })
+        }
+        editText?.setOnLongClickListener {
+            show()
+        }
         editText?.setOnKeyListener({ _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 dismiss()
@@ -187,6 +206,13 @@ open class KeyBoardView : LinearLayout {
         return onStateChangedListener
     }
 
+    fun setOnDecimalSizeOutOfBoundsListener(onDecimalSizeOutOfBoundsListener: OnDecimalSizeOutOfBoundsListener?) {
+        this.onDecimalSizeOutOfBoundsListener = onDecimalSizeOutOfBoundsListener
+    }
+
+    fun getOnDecimalSizeOutOfBoundsListener(): OnDecimalSizeOutOfBoundsListener? {
+        return onDecimalSizeOutOfBoundsListener
+    }
 
     fun setOnHeaderChildClickListener(@IdRes idRes: Int, listener: OnClickListener?) {
         headerView?.findViewById<View>(idRes)?.setOnClickListener(listener)
@@ -194,6 +220,14 @@ open class KeyBoardView : LinearLayout {
 
     fun isShowing(): Boolean {
         return behavior?.state == BottomSheetBehavior.STATE_EXPANDED
+    }
+
+    fun setDecimalSize(decimalSize: Int) {
+        this.decimalSize = decimalSize
+    }
+
+    fun getDecimalSize(): Int {
+        return decimalSize
     }
 
     fun show(): Boolean {
@@ -259,6 +293,7 @@ open class KeyBoardView : LinearLayout {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 textView.background = keyBackground
             } else {
+                @Suppress("DEPRECATION")
                 textView.setBackgroundDrawable(keyBackground)
             }
             textView.invalidate()
@@ -275,6 +310,7 @@ open class KeyBoardView : LinearLayout {
             textSize = a.getDimension(R.styleable.KeyBoardView_textSize, (-1).toFloat())
             textColor = a.getColor(R.styleable.KeyBoardView_textColor, Color.TRANSPARENT)
             keyBackground = a.getDrawable(R.styleable.KeyBoardView_keyBackground)
+            decimalSize = a.getInt(R.styleable.KeyBoardView_decimalSize, -1)
             a.recycle()
 
             setHeaderView(header)
@@ -389,9 +425,35 @@ open class KeyBoardView : LinearLayout {
             R.id.divide -> doAction(Action.DIVIDE, button)
             R.id.decimal -> onDecimalClick(button)
             R.id.opposite -> onOppositeClick(button)
-            else ->
-                editText?.text?.insert(editText!!.selectionStart, (button as TextView).text)
+            else -> {
+                editText?.text?.let {
+                    val lastIndexOf = it.lastIndexOf(".")
+                    if (decimalSize >= 0
+                            && lastIndexOf + decimalSize < it.length
+//                            && lastIndexOf+1 < it.length
+                            && !it.subSequence(lastIndexOf + 1, it.length).contains('+')
+                            && !it.subSequence(lastIndexOf + 1, it.length).contains('-')
+                            && !it.subSequence(lastIndexOf + 1, it.length).contains('/')
+                            && !it.subSequence(lastIndexOf + 1, it.length).contains('*')
+                    ) {
+                        onDecimalSizeOutOfBoundsListener?.onDecimalSizeOutOfBounds(editText!!, decimalSize)
+                    } else {
+                        it.insert(editText!!.selectionStart, (button as TextView).text)
+                    }
+//                    if (!TextUtils.isEmpty(it)
+//                            && it.length >= 4
+//                            && it[it.length - 3] == '.'
+//                            && it[it.length - 1] != '+'
+//                            && it[it.length - 1] != '-'
+//                            && it[it.length - 1] != '*'
+//                            && it[it.length - 1] != '/'
+//                    ) {
+////                    超过两位小数了
+//                    } else
+//                        it.insert(editText!!.selectionStart, (button as TextView).text)
+                }
 
+            }
         }
     }
 
@@ -486,7 +548,7 @@ open class KeyBoardView : LinearLayout {
     }
 
     private fun doCalculator(text: String?): String {
-        return CalculatorUtil.simpleCalculator(text, 2)
+        return CalculatorUtil.simpleCalculator(text, decimalSize)
     }
 
     /**

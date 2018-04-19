@@ -94,6 +94,7 @@
         app:show="true"
         app:textColor="#123456"
         app:textSize="12sp"
+        app:decimalSize="5"
         tools:behavior_peekHeight="200dp"
         tools:show="false" />
     <!--app:layout_behavior="@string/bottom_sheet_behavior"-->

@@ -10,8 +10,12 @@ class CalculatorUtil {
          * @param equation 要运算的公式
          * @param scale 如果时相除最大保留到小数点后多少位
          */
-        fun simpleCalculator(equation: String?, scale: Int): String {
+        fun simpleCalculator(equation: String?, scale: Int = 10): String {
             var finalString = "0"
+            var finalScale = scale
+            if (finalScale < 0) {
+                finalScale = 10
+            }
             if (!TextUtils.isEmpty(equation)) {
                 equation!!
                 var replace = equation.replace(" ", "")//去除公式中的所有空格
@@ -84,7 +88,12 @@ class CalculatorUtil {
                                     one = "-".plus(one)
                                 }
                                 val bigDecimalOne = BigDecimal(one.toString())
-                                finalString = bigDecimalOne.divide(bigDecimalTwo, scale, BigDecimal.ROUND_HALF_UP).toString()
+                                finalString = try {
+                                    bigDecimalOne.divide(bigDecimalTwo).toString()
+                                } catch (e: ArithmeticException) {
+                                    //只有除不尽才使用 finalScale
+                                    bigDecimalOne.divide(bigDecimalTwo, finalScale, BigDecimal.ROUND_HALF_UP).toString()
+                                }
                             }
                         }
                     }
