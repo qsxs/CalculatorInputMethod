@@ -180,6 +180,10 @@ open class KeyBoardView : LinearLayout {
         headerView?.findViewById<View>(idRes)?.setOnClickListener(listener)
     }
 
+    fun isShowing(): Boolean {
+        return behavior?.state == BottomSheetBehavior.STATE_EXPANDED
+    }
+
     fun show(): Boolean {
         if (parent is CoordinatorLayout) {
             initBehavior()
