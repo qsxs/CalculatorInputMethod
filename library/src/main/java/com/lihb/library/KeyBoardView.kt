@@ -18,7 +18,9 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.view.View.OnClickListener
+import android.view.View.OnFocusChangeListener
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -74,12 +76,20 @@ open class KeyBoardView : LinearLayout {
         if (view == null) {
             editText?.setOnTouchListener(null)
             editText?.setOnKeyListener(null)
+            editText?.onFocusChangeListener = null
+            dismiss()
         }
         editText = view
         editText?.setOnTouchListener { _, _ ->
             show()
         }
-
+        editText?.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                show()
+            } else {
+                dismiss()
+            }
+        }
         editText?.setOnKeyListener({ _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 dismiss()
@@ -231,7 +241,10 @@ open class KeyBoardView : LinearLayout {
         if (parent is CoordinatorLayout) {
             initBehavior()
             if (behavior!!.state != BottomSheetBehavior.STATE_EXPANDED) {
+                val imm = (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)//隐藏键盘
+                imm.hideSoftInputFromWindow(this.windowToken, 0)
                 behavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                editText?.requestFocus()
                 return true
             }
         }
