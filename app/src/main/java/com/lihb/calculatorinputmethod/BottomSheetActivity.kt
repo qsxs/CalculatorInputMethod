@@ -3,8 +3,11 @@ package com.lihb.calculatorinputmethod
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.lihb.library.KeyBoardView
+import com.lihb.library.OnStateChangedListener
 import kotlinx.android.synthetic.main.activity_bottom_sheet.*
 
 class BottomSheetActivity : AppCompatActivity() {
@@ -55,7 +58,7 @@ class BottomSheetActivity : AppCompatActivity() {
         val colors = intArrayOf(Color.BLACK, Color.BLUE, Color.RED, Color.YELLOW, Color.GRAY)
         var colorIndex = 0
 
-        btnTextColor.setOnClickListener{
+        btnTextColor.setOnClickListener {
             keyBoardView.setTextColor(colors[colorIndex])
             colorIndex++
             if (colorIndex == colors.size) {
@@ -70,5 +73,19 @@ class BottomSheetActivity : AppCompatActivity() {
                 colorIndex = 0
             }
         }
+
+        keyBoardView.setOnStateChangedListener(object : OnStateChangedListener {
+            override fun onShow(keyboardView: KeyBoardView) {
+                Log.i("TAG", "onShow")
+            }
+
+            override fun onSlide(keyboardView: KeyBoardView, slideOffset: Float) {
+                Log.i("TAG", "onSlide:$slideOffset")
+            }
+
+            override fun onDismiss(keyboardView: KeyBoardView) {
+                Log.i("TAG", "onDismiss")
+            }
+        })
     }
 }

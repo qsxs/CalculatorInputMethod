@@ -31,6 +31,7 @@ open class KeyBoardView : LinearLayout {
     private var headerView: View? = null
     private var contentView: View? = null
     private var onButtonClickListener: OnKeyClickListener? = null
+    private var onStateChangedListener: OnStateChangedListener? = null
     private var behavior: BottomSheetBehavior<KeyBoardView>? = null
     private var hideable: Boolean = false
     private var show: Boolean = false
@@ -178,6 +179,15 @@ open class KeyBoardView : LinearLayout {
         return onButtonClickListener
     }
 
+    fun setOnStateChangedListener(onStateChangedListener: OnStateChangedListener?) {
+        this.onStateChangedListener = onStateChangedListener
+    }
+
+    fun getOnStateChangedListener(): OnStateChangedListener? {
+        return onStateChangedListener
+    }
+
+
     fun setOnHeaderChildClickListener(@IdRes idRes: Int, listener: OnClickListener?) {
         headerView?.findViewById<View>(idRes)?.setOnClickListener(listener)
     }
@@ -322,6 +332,20 @@ open class KeyBoardView : LinearLayout {
             } else {
                 behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
             }
+            behavior!!.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    onStateChangedListener?.let {
+                        when (newState) {
+                            BottomSheetBehavior.STATE_EXPANDED -> it.onShow(this@KeyBoardView)
+                            BottomSheetBehavior.STATE_COLLAPSED -> it.onDismiss(this@KeyBoardView)
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    onStateChangedListener?.onSlide(this@KeyBoardView, slideOffset)
+                }
+            })
         }
     }
 
