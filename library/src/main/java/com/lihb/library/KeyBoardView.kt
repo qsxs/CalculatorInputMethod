@@ -160,8 +160,10 @@ open class KeyBoardView : LinearLayout {
     }
 
     fun setHeaderView(@LayoutRes layout: Int) {
-        val view = LayoutInflater.from(context).inflate(layout, this, false)
-        setHeaderView(view)
+        if (layout != 0) {
+            val view = LayoutInflater.from(context).inflate(layout, this, false)
+            setHeaderView(view)
+        }
     }
 
     fun getHeaderView(): View? {
