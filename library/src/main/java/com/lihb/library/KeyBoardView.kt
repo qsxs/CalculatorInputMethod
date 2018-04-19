@@ -18,6 +18,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.view.View.OnClickListener
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -29,7 +30,7 @@ open class KeyBoardView : LinearLayout {
     private var editText: EditText? = null
     private var headerView: View? = null
     private var contentView: View? = null
-    private var onButtonClickListener: OnButtonClickListener? = null
+    private var onButtonClickListener: OnKeyClickListener? = null
     private var behavior: BottomSheetBehavior<KeyBoardView>? = null
     private var hideable: Boolean = false
     private var show: Boolean = false
@@ -71,6 +72,14 @@ open class KeyBoardView : LinearLayout {
         })
     }
 
+    fun setText(@IdRes idRes: Int, text: CharSequence?) {
+        findViewById<TextView>(idRes)?.text = text
+    }
+
+    fun setText(@IdRes idRes: Int, @StringRes text: Int) {
+        setText(idRes, context.getString(text))
+    }
+
     fun setTextSize(size: Float, unit: Int = TypedValue.COMPLEX_UNIT_SP) {
         val c = context
         val r: Resources = if (c == null) {
@@ -82,7 +91,7 @@ open class KeyBoardView : LinearLayout {
         invalidateTextViews()
     }
 
-    fun getTextSize():Float{
+    fun getTextSize(): Float {
         return textSize
     }
 
@@ -91,7 +100,7 @@ open class KeyBoardView : LinearLayout {
         invalidateTextViews()
     }
 
-    fun getTextColor():Int{
+    fun getTextColor(): Int {
         return textColor
     }
 
@@ -129,7 +138,7 @@ open class KeyBoardView : LinearLayout {
         invalidateTextViews()
     }
 
-    fun getKeyBackGround():Drawable?{
+    fun getKeyBackGround(): Drawable? {
         return keyBackground
     }
 
@@ -159,11 +168,11 @@ open class KeyBoardView : LinearLayout {
         return headerView
     }
 
-    fun setOnNumberClickListener(onButtonClickListener: OnButtonClickListener?) {
+    fun setOnNumberClickListener(onButtonClickListener: OnKeyClickListener?) {
         this.onButtonClickListener = onButtonClickListener
     }
 
-    fun getOnNumberClickListener(): OnButtonClickListener? {
+    fun getOnNumberClickListener(): OnKeyClickListener? {
         return onButtonClickListener
     }
 
@@ -233,7 +242,7 @@ open class KeyBoardView : LinearLayout {
             textView.setTextColor(textColor)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 textView.background = keyBackground
-            }else{
+            } else {
                 textView.setBackgroundDrawable(keyBackground)
             }
             textView.invalidate()
@@ -266,7 +275,7 @@ open class KeyBoardView : LinearLayout {
         getTextViews(contentView as ViewGroup, buttons)
         val onClickListener = OnClickListener {
             onButtonClick(it)
-            onButtonClickListener?.onButtonClick(it)
+            onButtonClickListener?.onKeyClick(it)
         }
         for (button in buttons) {
             button.setOnClickListener(onClickListener)
@@ -287,6 +296,7 @@ open class KeyBoardView : LinearLayout {
         }
         view?.setOnClickListener {
             deleteHandler.sendEmptyMessage(DELETE)
+            onButtonClickListener?.onKeyClick(it)
         }
         view?.setOnTouchListener { _, event ->
             when (event.action) {
@@ -311,7 +321,7 @@ open class KeyBoardView : LinearLayout {
 
     private fun initPeekHeight() {
         behavior?.let {
-//            val height =
+            //            val height =
 //                    if (headerView == null) 0
 //                    else headerView!!.measuredHeight
 //            it.peekHeight = if (hideable) 0 else height
@@ -438,6 +448,8 @@ open class KeyBoardView : LinearLayout {
         var doCalculator = doCalculator(text.toString())
         if (action != Action.DONE) {
             doCalculator = doCalculator.plus(button.text)
+        } else {
+            editText?.onEditorAction(EditorInfo.IME_ACTION_DONE)
         }
         editText?.setText(doCalculator)
         editText?.setSelection(editText!!.text.length)
