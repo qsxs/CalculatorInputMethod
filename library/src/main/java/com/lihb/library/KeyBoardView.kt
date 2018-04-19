@@ -2,18 +2,20 @@ package com.lihb.library
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Handler
 import android.os.Message
-import android.support.annotation.IdRes
-import android.support.annotation.LayoutRes
-import android.support.annotation.RequiresApi
+import android.support.annotation.*
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.text.TextUtils
 import android.util.AttributeSet
+import android.util.Log
+import android.util.TypedValue
 import android.view.*
 import android.view.View.OnClickListener
 import android.widget.EditText
@@ -34,6 +36,7 @@ open class KeyBoardView : LinearLayout {
     private var textSize: Float = (-1).toFloat()
     private var textColor: Int = Color.TRANSPARENT
     private var keyBackground: Drawable? = null
+    private var mBackgroundResource: Int = 0
 
     enum class Action {
         DELETE,
@@ -66,6 +69,68 @@ open class KeyBoardView : LinearLayout {
                 false
             }
         })
+    }
+
+    fun setTextSize(size: Float, unit: Int = TypedValue.COMPLEX_UNIT_SP) {
+        val c = context
+        val r: Resources = if (c == null) {
+            Resources.getSystem()
+        } else {
+            c.resources
+        }
+        textSize = TypedValue.applyDimension(unit, size, r.displayMetrics)
+        invalidateTextViews()
+    }
+
+    fun getTextSize():Float{
+        return textSize
+    }
+
+    fun setTextColor(@ColorInt color: Int) {
+        textColor = color
+        invalidateTextViews()
+    }
+
+    fun getTextColor():Int{
+        return textColor
+    }
+
+    @RequiresApi(Build.VERSION_CODES.HONEYCOMB)
+    fun setKeyBackgroundColor(@ColorInt color: Int) {
+        if (keyBackground is ColorDrawable) {
+            (keyBackground?.mutate() as ColorDrawable).color = color
+            mBackgroundResource = 0
+
+            invalidateTextViews()
+        } else {
+            setKeyBackground(ColorDrawable(color))
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun setKeyBackgroundResource(@DrawableRes resid: Int) {
+        if (resid != 0 && resid == mBackgroundResource) {
+            return
+        }
+
+        var d: Drawable? = null
+        if (resid != 0) {
+            d = context.getDrawable(resid)
+        }
+        setKeyBackground(d)
+
+        mBackgroundResource = resid
+    }
+
+    fun setKeyBackground(background: Drawable?) {
+        keyBackground = background
+        mBackgroundResource = 0
+
+        invalidateTextViews()
+    }
+
+    fun getKeyBackGround():Drawable?{
+        return keyBackground
     }
 
     fun setHideable(hideable: Boolean) {
@@ -158,10 +223,20 @@ open class KeyBoardView : LinearLayout {
         super.onLayout(changed, l, t, r, b)
         //这里最早得知headerView的高度
         initPeekHeight()
-        if (show) {
-            behavior?.state = BottomSheetBehavior.STATE_EXPANDED
-        } else {
-            behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+    }
+
+    private fun invalidateTextViews() {
+        val buttons = ArrayList<TextView>()
+        getTextViews(contentView as ViewGroup, buttons)
+        for (textView in buttons) {
+            textView.textSize = textSize
+            textView.setTextColor(textColor)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                textView.background = keyBackground
+            }else{
+                textView.setBackgroundDrawable(keyBackground)
+            }
+            textView.invalidate()
         }
     }
 
@@ -184,18 +259,6 @@ open class KeyBoardView : LinearLayout {
         addView(contentView)
         initViews()
 
-//        var textView = contentView?.findViewById<TextView>(R.id.delete)
-//        val html = "<img src='" + R.drawable.keyboard_delete + "'/>"
-//        val reslut = Html.fromHtml(html, Html.ImageGetter { s ->
-//            //获取资源ID
-//            val resId = Integer.parseInt(s)
-//            //装载图像资源
-//            val drawable = resources.getDrawable(resId)
-//            //设置图像按原始大小显示
-//            drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
-//            drawable
-//        }, null)
-//        textView?.text = reslut
     }
 
     private fun initViews() {
@@ -237,15 +300,44 @@ open class KeyBoardView : LinearLayout {
         if (parent is CoordinatorLayout && behavior == null) {
             (layoutParams as CoordinatorLayout.LayoutParams).behavior = BottomSheetBehavior<LinearLayout>()
             behavior = BottomSheetBehavior.from(this)
+            if (show) {
+                behavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                show = false //一次失效
+            } else {
+                behavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
         }
     }
 
     private fun initPeekHeight() {
-        val height =
-                if (headerView == null) 0
-                else headerView!!.measuredHeight
-//        Log.i(TAG, "onLayout".plus(height))
-        behavior?.peekHeight = if (hideable) 0 else height
+        behavior?.let {
+//            val height =
+//                    if (headerView == null) 0
+//                    else headerView!!.measuredHeight
+//            it.peekHeight = if (hideable) 0 else height
+            it.peekHeight = when {
+                hideable -> 0
+                headerView == null -> 0
+                else -> headerView!!.measuredHeight
+            }
+
+            Log.i(TAG, "it.peekHeight:" + it.peekHeight.toString())
+            //防止peek挡住主体内容
+            val coordinatorLayout = parent as CoordinatorLayout
+            //防止遮挡
+            for (i in 0 until coordinatorLayout.childCount) {
+                val childAt = coordinatorLayout.getChildAt(i)
+                if (childAt != this) {
+                    val params = childAt.layoutParams as MarginLayoutParams
+                    if (params.bottomMargin != it.peekHeight &&
+                            params.height == ViewGroup.LayoutParams.MATCH_PARENT) {
+                        params.bottomMargin = it.peekHeight
+                        Log.i(TAG, "params.bottomMargin:" + params.bottomMargin.toString())
+                        childAt.layoutParams = params
+                    }
+                }
+            }
+        }
     }
 
     private fun onButtonClick(button: View) {

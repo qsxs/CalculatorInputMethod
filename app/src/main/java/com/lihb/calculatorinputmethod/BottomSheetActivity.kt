@@ -1,5 +1,6 @@
 package com.lihb.calculatorinputmethod
 
+import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
@@ -40,5 +41,34 @@ class BottomSheetActivity : AppCompatActivity() {
             Toast.makeText(this, hideable.toString(), Toast.LENGTH_SHORT).show()
             hideable = !hideable
         })
+
+        val textSizes = intArrayOf(8, 16, 24, 32, 64)
+        var index = 0
+        btnTextSize.setOnClickListener {
+            keyBoardView.setTextSize(textSizes[index].toFloat())
+            index++
+            if (index == textSizes.size) {
+                index = 0
+            }
+        }
+
+        val colors = intArrayOf(Color.BLACK, Color.BLUE, Color.RED, Color.YELLOW, Color.GRAY)
+        var colorIndex = 0
+
+        btnTextColor.setOnClickListener{
+            keyBoardView.setTextColor(colors[colorIndex])
+            colorIndex++
+            if (colorIndex == colors.size) {
+                colorIndex = 0
+            }
+        }
+
+        btnKeyBackground.setOnClickListener {
+            keyBoardView.setKeyBackgroundColor(colors[colorIndex])
+            colorIndex++
+            if (colorIndex == colors.size) {
+                colorIndex = 0
+            }
+        }
     }
 }

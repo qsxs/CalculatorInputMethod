@@ -5,41 +5,84 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <EditText
-            android:id="@+id/et"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btnRegister"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="register EditText" />
+            <EditText
+                android:id="@+id/et"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
-        <Button
-            android:id="@+id/btnUnRegister"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="unregister EditText" />
+            <Button
+                android:id="@+id/btnRegister"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="register EditText" />
 
-        <Button
-            android:id="@+id/btnChangerHeader"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Changer Header" />
+            <Button
+                android:id="@+id/btnUnRegister"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="unregister EditText" />
 
-        <Button
-            android:id="@+id/btnHideable"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Hideable" />
+            <Button
+                android:id="@+id/btnChangerHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Changer Header" />
 
-    </LinearLayout>
+            <Button
+                android:id="@+id/btnHideable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hideable" />
+
+            <Button
+                android:id="@+id/btnTextSize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Text Size" />
+
+            <Button
+                android:id="@+id/btnTextColor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Text Color" />
+
+            <Button
+                android:id="@+id/btnKeyBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Key Background" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Key" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Key" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Key" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Key" />
+
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
 
     <com.lihb.library.KeyBoardView
         android:id="@+id/keyBoardView"
@@ -48,11 +91,12 @@
         android:background="@color/design_bottom_navigation_shadow_color"
         app:header="@layout/header"
         app:hideable="false"
-        app:textSize="12sp"
-        app:textColor="#123456"
         app:keyBackground="#666"
-        app:show="true"
-        tools:behavior_peekHeight="200dp" />
+        app:show="false"
+        app:textColor="#123456"
+        app:textSize="12sp"
+        tools:behavior_peekHeight="200dp"
+        tools:show="false" />
     <!--app:layout_behavior="@string/bottom_sheet_behavior"-->
     <!--tools:behavior_peekHeight="200dp" />-->
 </android.support.design.widget.CoordinatorLayout>
