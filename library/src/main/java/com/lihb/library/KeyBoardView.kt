@@ -243,8 +243,10 @@ open class KeyBoardView : LinearLayout {
             if (behavior!!.state != BottomSheetBehavior.STATE_EXPANDED) {
                 val imm = (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)//隐藏键盘
                 imm.hideSoftInputFromWindow(this.windowToken, 0)
-                behavior?.state = BottomSheetBehavior.STATE_EXPANDED
-                editText?.requestFocus()
+                post {
+                    behavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                    editText?.requestFocus()
+                }
                 return true
             }
         }

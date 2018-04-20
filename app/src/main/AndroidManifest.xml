@@ -16,7 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".BottomSheetActivity" />
+        <activity android:name=".BottomSheetActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity android:name=".PopupWindowActivity" />
     </application>
 
