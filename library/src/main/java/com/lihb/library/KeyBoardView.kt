@@ -21,6 +21,7 @@ import android.view.View.OnClickListener
 import android.view.View.OnFocusChangeListener
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Checkable
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -97,6 +98,19 @@ open class KeyBoardView : LinearLayout {
                 false
             }
         }
+    }
+
+    fun isViewSelected(@IdRes idRes: Int): Boolean {
+        return findViewById<View>(idRes).isSelected
+    }
+
+    fun isViewChecked(@IdRes idRes: Int): Boolean {
+        val view = findViewById<View>(idRes)
+        return view is Checkable && view.isChecked
+    }
+
+    fun <T : View> getChildenView(@IdRes idRes: Int): T {
+        return findViewById(idRes)
     }
 
     fun setText(@IdRes idRes: Int, text: CharSequence?) {
