@@ -90,13 +90,13 @@ open class KeyBoardView : LinearLayout {
                 dismiss()
             }
         }
-        editText?.setOnKeyListener({ _, keyCode, _ ->
+        editText?.setOnKeyListener { _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 dismiss()
             } else {
                 false
             }
-        })
+        }
     }
 
     fun setText(@IdRes idRes: Int, text: CharSequence?) {
@@ -197,11 +197,11 @@ open class KeyBoardView : LinearLayout {
         return headerView
     }
 
-    fun setOnNumberClickListener(onButtonClickListener: OnKeyClickListener?) {
+    fun setOnKeyClickListener(onButtonClickListener: OnKeyClickListener?) {
         this.onButtonClickListener = onButtonClickListener
     }
 
-    fun getOnNumberClickListener(): OnKeyClickListener? {
+    fun getOnKeyClickListener(): OnKeyClickListener? {
         return onButtonClickListener
     }
 
@@ -297,11 +297,13 @@ open class KeyBoardView : LinearLayout {
     }
 
     private fun invalidateTextViews() {
-        val buttons = ArrayList<TextView>()
-        getTextViews(contentView as ViewGroup, buttons)
+        val buttons = ArrayList<View>()
+        getViews(contentView as ViewGroup, buttons)
         for (textView in buttons) {
-            textView.textSize = textSize
-            textView.setTextColor(textColor)
+            if (textView is TextView) {
+                textView.textSize = textSize
+                textView.setTextColor(textColor)
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 textView.background = keyBackground
             } else {
@@ -335,20 +337,23 @@ open class KeyBoardView : LinearLayout {
     }
 
     private fun initViews() {
-        val buttons = ArrayList<TextView>()
-        getTextViews(contentView as ViewGroup, buttons)
+        val views = ArrayList<View>()
+        getViews(contentView as ViewGroup, views)
         val onClickListener = OnClickListener {
-            onButtonClick(it)
-            onButtonClickListener?.onKeyClick(it)
+            if (onButtonClickListener?.onKeyClick(it) != true) {
+                onButtonClick(it)
+            }
+
         }
-        for (button in buttons) {
-            button.setOnClickListener(onClickListener)
-            if (textSize > 0)
-                button.textSize = textSize
-            if (textColor != Color.TRANSPARENT)
-                button.setTextColor(textColor)
-            if (keyBackground != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                button.background = keyBackground
+        for (view in views) {
+            view.setOnClickListener(onClickListener)
+            if (view is TextView) {
+                if (textSize > 0) view.textSize = textSize
+                if (textColor != Color.TRANSPARENT) view.setTextColor(textColor)
+            }
+            if (keyBackground != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                view.background = keyBackground
+            }
         }
         val view = findViewById<View>(R.id.delete)
         view?.setOnLongClickListener {
@@ -607,18 +612,18 @@ open class KeyBoardView : LinearLayout {
     /**
      * 获取viewGroup下所有button
      */
-    private fun getTextViews(viewGroup: ViewGroup?, buttons: MutableList<TextView>) {
+    private fun getViews(viewGroup: ViewGroup?, buttons: MutableList<View>) {
         if (viewGroup == null) {
             return
         }
         val count = viewGroup.childCount
         for (i in 0 until count) {
             val view = viewGroup.getChildAt(i)
-            if (view is TextView) { // 若是Button记录下
-                buttons.add(view)
-            } else if (view is ViewGroup) {
+            if (view is ViewGroup) {
                 // 若是布局控件（LinearLayout或RelativeLayout）,继续查询子View
-                this.getTextViews(view, buttons)
+                this.getViews(view, buttons)
+            } else if (view is View) { // 若是Button记录下
+                buttons.add(view)
             }
         }
     }
