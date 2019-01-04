@@ -94,6 +94,9 @@ class CalculatorUtil {
                                     //只有除不尽才使用 finalScale
                                     bigDecimalOne.divide(bigDecimalTwo, finalScale, BigDecimal.ROUND_HALF_UP).toString()
                                 }
+                            } else {
+                                //只有被除数为0,直接返回0
+                                finalString = "0"
                             }
                         }
                     }
